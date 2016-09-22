@@ -76,7 +76,7 @@ def unfollow(userid):
     data = urllib.parse.urlencode(postData)
     data = data.encode('UTF-8')
     req = urllib.request.Request(unfollowURL, data=data, headers=headers)
-    resp = urllib.request.urlopen(req)
+    resp = urllib.request.urlopen(req, timeout=5)
     print(resp)
 
 followingURL = "https://www.tumblr.com/following"
@@ -131,6 +131,10 @@ for userLink in arrUnfollow:
     data = urllib.parse.urlencode(postData)
     data = data.encode('UTF-8')
     req = urllib.request.Request(unfollowURL, data=data, headers=headers)
-    resp = urllib.request.urlopen(req)
-    print(resp)
+
+    try:
+        resp = urllib.request.urlopen(req, timeout=5)
+    except Exception as e:
+        print(e)
+        continue
 
