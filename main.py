@@ -1,8 +1,33 @@
+
 import urllib
+import pymysql.cursors
+import pymysql
 from urllib import request, parse
 import http.cookiejar, re,work, threading, queue,math
 
+connection = pymysql.connect(host='localhost', user='root',password='1234527', db='mydb',cursorclass=pymysql.cursors.DictCursor)
+try:
+    with connection.cursor() as cursor:
+        # sql = """
+        #    CREATE TABLE IF NOT EXISTS users(
+        #    uid int(11) NOT NULL,
+        #    email varchar(255) NOT NULL,
+        #    password varchar(255) NOT NULL
+        #    )"""
+        # cursor.execute(sql)
 
+        # sql = "INSERT INTO users (uid,email, password) VALUES (%s, %s, %s)"
+        # cursor.execute(sql, ('9527', '411@qq.com', '123'))
+        # connection.commit()
+    # with connection.cursor() as cursor:
+        sql = "SELECT uid, password FROM users WHERE email=%s"
+        cursor.execute(sql, ('411@qq.com'))
+        result = cursor.fetchone()
+        print(result)
+finally:
+    connection.close()
+
+exit(0)
 
 posturl = 'https://www.tumblr.com/login'
 cj = http.cookiejar.MozillaCookieJar('tmp.txt')
@@ -53,39 +78,32 @@ if html.find('logout_button'):
     print('login ok!')
 else:
     exit()
-# print(content.decode('UTF-8'))
 
-def unfollow(userid):
-    unfollowURL = 'https://www.tumblr.com/svc/unfollow'
-    headers = {
-    'Host': 'www.tumblr.com',
-    'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:48.0) Gecko/20100101 Firefox/48.0',
-    'Accept': '*/*',
-    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-    'X-tumblr-form-key': formkey,
-    'X-Requested-With': 'XMLHttpRequest',
-    'Referer': 'https://www.tumblr.com/following/0',
-    'Content-Length': '110',
-    'Connection': 'keep-alive'}
+userLink = "http://xuntee.tumblr.com/"
+tmpPage = 0
+reStr = '<a href="(.*?)" class="meta-item post-notes">(.*?) notes</a>'
+arrPost = []
+while(True):
+    url = userLink + 'page/' + str(tmpPage)
+    res = request.urlopen(url).read().decode('UTF-8')
+    res = re.findall(reStr, res)
+    for obj in res:
+        arrPost.append(obj)
+    if len(res) < 10:
+        break
+    else:
+        tmpPage += 1
+    print(str(tmpPage)+'_'+str(len(res)))
 
-    postData = {
-    'form_key':formkey,
-    'data[tumblelog]':userid,
-    'data[source]':'UNFOLLOW_SOURCE_FOLLOWING_PAGE'}
+print(arrPost)
+exit(0)
 
-    data = urllib.parse.urlencode(postData)
-    data = data.encode('UTF-8')
-    req = urllib.request.Request(unfollowURL, data=data, headers=headers)
-    resp = urllib.request.urlopen(req, timeout=5)
-    print(resp)
-
+##### unfollow
 followingURL = "https://www.tumblr.com/following"
 res = request.urlopen(followingURL).read().decode('UTF-8')
 reStr = '<a class="tab selected" href="/following">在 Tumblr 上关注 (.*?)</a>'
 followCnt = re.findall(reStr, res)[0]
 
-followingURL = "https://www.tumblr.com/following"
-res = request.urlopen(followingURL).read().decode('UTF-8')
 reStr = '<meta name="tumblr-form-key" content="(.*?)" id="tumblr_form_key">'
 formkey = re.findall(reStr, res)[0]
 
@@ -120,10 +138,11 @@ headers = {
     'Referer': 'https://www.tumblr.com/following/0',
     'Content-Length': '110',
      'Connection': 'keep-alive'}
+
 unfollowURL = 'https://www.tumblr.com/svc/unfollow'
 for userLink in arrUnfollow:
     userid = userLink[7: userLink.find('.tumblr.com')]
-    print(userid)
+
     postData = {
     'form_key':formkey,
     'data[tumblelog]':userid,
@@ -135,6 +154,6 @@ for userLink in arrUnfollow:
     try:
         resp = urllib.request.urlopen(req, timeout=5)
     except Exception as e:
-        print(e)
+        print(userid)
         continue
-
+#####
