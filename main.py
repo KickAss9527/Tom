@@ -5,29 +5,29 @@ import pymysql
 from urllib import request, parse
 import http.cookiejar, re,work, threading, queue,math
 
-connection = pymysql.connect(host='localhost', user='root',password='1234527', db='mydb',cursorclass=pymysql.cursors.DictCursor)
-try:
-    with connection.cursor() as cursor:
-        # sql = """
-        #    CREATE TABLE IF NOT EXISTS users(
-        #    uid int(11) NOT NULL,
-        #    email varchar(255) NOT NULL,
-        #    password varchar(255) NOT NULL
-        #    )"""
-        # cursor.execute(sql)
-
-        # sql = "INSERT INTO users (uid,email, password) VALUES (%s, %s, %s)"
-        # cursor.execute(sql, ('9527', '411@qq.com', '123'))
-        # connection.commit()
-    # with connection.cursor() as cursor:
-        sql = "SELECT uid, password FROM users WHERE email=%s"
-        cursor.execute(sql, ('411@qq.com'))
-        result = cursor.fetchone()
-        print(result)
-finally:
-    connection.close()
-
-exit(0)
+# connection = pymysql.connect(host='localhost', user='root',password='1234527', db='mydb',cursorclass=pymysql.cursors.DictCursor)
+# try:
+#     with connection.cursor() as cursor:
+#         # sql = """
+#         #    CREATE TABLE IF NOT EXISTS users(
+#         #    uid int(11) NOT NULL,
+#         #    email varchar(255) NOT NULL,
+#         #    password varchar(255) NOT NULL
+#         #    )"""
+#         # cursor.execute(sql)
+#
+#         # sql = "INSERT INTO users (uid,email, password) VALUES (%s, %s, %s)"
+#         # cursor.execute(sql, ('9527', '411@qq.com', '123'))
+#         # connection.commit()
+#     # with connection.cursor() as cursor:
+#         sql = "SELECT uid, password FROM users WHERE email=%s"
+#         cursor.execute(sql, ('411@qq.com'))
+#         result = cursor.fetchone()
+#         print(result)
+# finally:
+#     connection.close()
+#
+# exit(0)
 
 posturl = 'https://www.tumblr.com/login'
 cj = http.cookiejar.MozillaCookieJar('tmp.txt')
@@ -79,23 +79,52 @@ if html.find('logout_button'):
 else:
     exit()
 
-userLink = "http://xuntee.tumblr.com/"
-tmpPage = 0
-reStr = '<a href="(.*?)" class="meta-item post-notes">(.*?) notes</a>'
-arrPost = []
-while(True):
-    url = userLink + 'page/' + str(tmpPage)
-    res = request.urlopen(url).read().decode('UTF-8')
-    res = re.findall(reStr, res)
-    for obj in res:
-        arrPost.append(obj)
-    if len(res) < 10:
-        break
-    else:
-        tmpPage += 1
-    print(str(tmpPage)+'_'+str(len(res)))
+maxPost = ['', '0']
+goodPost = []
 
-print(arrPost)
+def getNoteValue(str):
+    str = str.replace(',', '')
+    return int(str)
+
+def getUserPostData(userLink):
+    tmpPage = 0
+    reStr = '<a href="(.*?)" class="meta-item post-notes">(.*?) notes</a>'
+    while(True):
+        url = userLink + 'page/' + str(tmpPage)
+        res = request.urlopen(url).read().decode('UTF-8')
+        res = re.findall(reStr, res)
+        for obj in res:
+            if len(obj[1])>6:
+                print(obj)# goodPost.append(obj)
+            # if getNoteValue(obj[1]) > getNoteValue(maxPost[1]):# maxPost = obj
+        if len(res) < 10:
+            break
+        else:
+            tmpPage += 1
+
+    # print('\n good list')
+    # print(goodPost)
+    # print('\n maxPost')
+    # print(maxPost)
+
+followingURL = "https://www.tumblr.com/following"
+res = request.urlopen(followingURL).read().decode('UTF-8')
+reStr = '<a class="tab selected" href="/following">在 Tumblr 上关注 (.*?)</a>'
+followCnt = re.findall(reStr, res)[0]
+pageCnt = int(followCnt)/25
+
+reUserLinkStr = '<a class="name-link" href="(.*?)"'
+for i in range(0, math.ceil(pageCnt)):
+    url = followingURL+'/'+str(i*25)
+    res = request.urlopen(url).read().decode('UTF-8')
+    res = re.findall(reUserLinkStr, res)
+    print('page '+str(i+1))
+    for link in res:
+        print('new user: '+link)
+        getUserPostData(link)
+
+
+
 exit(0)
 
 ##### unfollow
