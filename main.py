@@ -67,6 +67,7 @@ def getNoteValue(str):
     return int(str)
 
 def getUserPostData(userLink):
+    username = userLink[7:-12]
     tmpPage = 0
     reStr = '<a href="(.*?)" class="meta-item post-notes">(.*?) notes</a>'
     while(True):
@@ -74,8 +75,10 @@ def getUserPostData(userLink):
         res = request.urlopen(url).read().decode('UTF-8')
         res = re.findall(reStr, res)
         for obj in res:
-            if len(obj[1])>6:
-                print(obj)# goodPost.append(obj)
+            note = obj[1].replace(',','')
+            db.insert(obj[0], int(note), username)
+            # if len(obj[1])>6:
+            #     print(obj)# goodPost.append(obj)
             # if getNoteValue(obj[1]) > getNoteValue(maxPost[1]):# maxPost = obj
         if len(res) < 10:
             break
