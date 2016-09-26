@@ -13,8 +13,10 @@ class Work(threading.Thread):
                     time.sleep(1)
                     print('sleep over')
                     continue;
-                dofun, args = self.work_queue.get(block=False)
-                dofun(args[0], args[1])
+                items = self.work_queue.get(block=False)
+                fun = items[0]
+                args = items[1]
+                fun(args)
                 self.work_queue.task_done()
                 print('left work count : ', self.work_queue.qsize())
             except Exception as e:

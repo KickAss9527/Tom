@@ -5,9 +5,10 @@ import pymysql.cursors
 import pymysql
 from urllib import request, parse
 import http.cookiejar, re,work, threading, queue,math
+import threading, queue
 
 db = myDB.MyDB()
-
+arrResult = []
 
 posturl = 'https://www.tumblr.com/login'
 cj = http.cookiejar.MozillaCookieJar('tmp.txt')
@@ -27,8 +28,6 @@ res = request.urlopen(req)
 content = res.read().decode('UTF-8')
 reStr = '<meta name="tumblr-form-key" content="(.*?)" id="tumblr_form_key">'
 formkey = re.findall(reStr, content)[0]
-
-print(formkey)
 
 cookie_support = urllib.request.HTTPCookieProcessor(cj)
 opener = urllib.request.build_opener(cookie_support)
@@ -76,6 +75,7 @@ def getUserPostData(userLink):
         res = re.findall(reStr, res)
         for obj in res:
             note = obj[1].replace(',','')
+            print(obj[0]+username)
             db.insert(obj[0], int(note), username)
             # if len(obj[1])>6:
             #     print(obj)# goodPost.append(obj)
@@ -90,6 +90,7 @@ def getUserPostData(userLink):
     # print('\n maxPost')
     # print(maxPost)
 
+
 followingURL = "https://www.tumblr.com/following"
 res = request.urlopen(followingURL).read().decode('UTF-8')
 reStr = '<a class="tab selected" href="/following">在 Tumblr 上关注 (.*?)</a>'
@@ -97,16 +98,27 @@ followCnt = re.findall(reStr, res)[0]
 pageCnt = int(followCnt)/25
 
 reUserLinkStr = '<a class="name-link" href="(.*?)"'
+works = queue.Queue()
+
 for i in range(0, math.ceil(pageCnt)):
     url = followingURL+'/'+str(i*25)
-    res = request.urlopen(url).read().decode('UTF-8')
+    res = request.urlopen(url).read().decode('UTF-8','ignore')
     res = re.findall(reUserLinkStr, res)
-    print('page '+str(i+1))
     for link in res:
-        print('new user: '+link)
-        getUserPostData(link)
+        print(link)
+        works.put((getUserPostData,(link)))
+    arrResult.extend(res)
 
+    break;
 
+threads = []
+maxThreadCnt = 4
+
+for i in range(0, maxThreadCnt):
+    w = work.Work(works)
+    threads.append(w)
+for t in threads:
+    t.join()
 
 exit(0)
 
