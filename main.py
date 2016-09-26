@@ -7,7 +7,7 @@ from urllib import request, parse
 import http.cookiejar, re,work, threading, queue,math
 import threading, queue
 
-db = myDB.MyDB()
+
 arrResult = []
 
 posturl = 'https://www.tumblr.com/login'
@@ -69,18 +69,20 @@ def getUserPostData(userLink):
     username = userLink[7:-12]
     tmpPage = 0
     reStr = '<a href="(.*?)" class="meta-item post-notes">(.*?) notes</a>'
+    db = myDB.MyDB()
+    print('user：'+username+' begin')
     while(True):
         url = userLink + 'page/' + str(tmpPage)
         res = request.urlopen(url).read().decode('UTF-8')
         res = re.findall(reStr, res)
         for obj in res:
-            note = obj[1].replace(',','')
-            print(obj[0]+username)
-            db.insert(obj[0], int(note), username)
+            db.insert(obj[0], getNoteValue(obj[1]), username)
             # if len(obj[1])>6:
             #     print(obj)# goodPost.append(obj)
             # if getNoteValue(obj[1]) > getNoteValue(maxPost[1]):# maxPost = obj
         if len(res) < 10:
+            print('user:'+username+' finished')
+            db.finish()
             break
         else:
             tmpPage += 1
@@ -108,7 +110,6 @@ for i in range(0, math.ceil(pageCnt)):
         print(link)
         works.put((getUserPostData,(link)))
     arrResult.extend(res)
-
     break;
 
 threads = []
