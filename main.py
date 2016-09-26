@@ -1,33 +1,13 @@
 
 import urllib
+import myDB
 import pymysql.cursors
 import pymysql
 from urllib import request, parse
 import http.cookiejar, re,work, threading, queue,math
 
-# connection = pymysql.connect(host='localhost', user='root',password='1234527', db='mydb',cursorclass=pymysql.cursors.DictCursor)
-# try:
-#     with connection.cursor() as cursor:
-#         # sql = """
-#         #    CREATE TABLE IF NOT EXISTS users(
-#         #    uid int(11) NOT NULL,
-#         #    email varchar(255) NOT NULL,
-#         #    password varchar(255) NOT NULL
-#         #    )"""
-#         # cursor.execute(sql)
-#
-#         # sql = "INSERT INTO users (uid,email, password) VALUES (%s, %s, %s)"
-#         # cursor.execute(sql, ('9527', '411@qq.com', '123'))
-#         # connection.commit()
-#     # with connection.cursor() as cursor:
-#         sql = "SELECT uid, password FROM users WHERE email=%s"
-#         cursor.execute(sql, ('411@qq.com'))
-#         result = cursor.fetchone()
-#         print(result)
-# finally:
-#     connection.close()
-#
-# exit(0)
+db = myDB.MyDB()
+
 
 posturl = 'https://www.tumblr.com/login'
 cj = http.cookiejar.MozillaCookieJar('tmp.txt')
