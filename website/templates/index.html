@@ -1,0 +1,10 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}Sam{% endblock %}
+{% block content %}
+<ul>
+    {% for data in topPosts %}
+    <li>{{data}}</li>
+    {% endfor %}
+</ul>
+{% endblock %}
