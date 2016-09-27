@@ -1,12 +1,17 @@
-
-import urllib
-import myDB
-import pymysql.cursors
+import http.cookiejar
+import math
 import pymysql
+import pymysql.cursors
+import queue
+import queue
+import re
+import threading
+import threading
+import urllib
 from urllib import request, parse
-import http.cookiejar, re,work, threading, queue,math
-import threading, queue
 
+import myDB
+import work
 
 arrResult = []
 

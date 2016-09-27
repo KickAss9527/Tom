@@ -4,7 +4,7 @@ import pymysql
 
 class MyDB:
     def __init__(self):
-        self.connection = pymysql.connect(host='localhost', user='root',password='1234', db='mydb',use_unicode=True, charset="utf8",cursorclass=pymysql.cursors.DictCursor)
+        self.connection = pymysql.connect(host='localhost', user='root',password='1234527', db='mydb',use_unicode=True, charset="utf8",cursorclass=pymysql.cursors.DictCursor)
         sqlCreate = """
            CREATE TABLE IF NOT EXISTS POST(
            pid int(11) NOT NULL AUTO_INCREMENT,
