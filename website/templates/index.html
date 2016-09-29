@@ -2,9 +2,11 @@
 
 {% block title %}Sam{% endblock %}
 {% block content %}
+<div class="container">
 <ul>
     {% for data in topPosts %}
-    <li>{{data}}</li>
+    <li>{{data.note}}</li>
     {% endfor %}
 </ul>
+    </div>
 {% endblock %}

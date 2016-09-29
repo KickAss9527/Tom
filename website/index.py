@@ -15,14 +15,11 @@ class POST(db.Model):
     title = db.Column('title', db.String(64), primary_key=True)
     userName = db.Column('userName', db.String(64), primary_key=True)
 
-p = POST.query.all()
-print(len(p))
-for obj in p:
-    print(obj.link)
+topPosts = POST.query.order_by(POST.note.desc()).limit(20).all()
 
 @app.route('/')
 def index():
-    return render_template('index.html', topPosts={1,2,3,4,6,6})
+    return render_template('index.html', topPosts=topPosts)
 
 @app.route('/user/<name>')
 def user(name):

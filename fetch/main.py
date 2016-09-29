@@ -66,27 +66,38 @@ else:
 maxPost = ['', '0']
 goodPost = []
 
+def getNickNameByLink(userLink):
+    return userLink[7:-12]
+
+def getUpdateDay(timeStr):
+    day = int(timeStr[:1])
+    if timeStr.find('小时') >0 : day = 0
+    elif timeStr.find('周') >0 : day *= 7
+    elif timeStr.find('月') >0 : day *= 30
+    elif timeStr.find('年') >0 : day *= 365
+    return day
+
 def getNoteValue(str):
     str = str.replace(',', '')
     return int(str)
 
-def getUserPostData(userLink):
-    username = userLink[7:-12]
+def getUserPostData(uid):
+    db = myDB.MyDB()
     tmpPage = 0
     reStr = '<a href="(.*?)" class="meta-item post-notes">(.*?) notes</a>'
-    db = myDB.MyDB()
-    print('user：'+username+' begin')
+    print('userid：'+str(uid)+' begin')
+    userPage = 'http://www.' + str(db.getNickNameByID(uid)) + '.tumblr.com/page/'
     while(True):
-        url = userLink + 'page/' + str(tmpPage)
+        url = userPage + str(tmpPage)
         res = request.urlopen(url).read().decode('UTF-8')
         res = re.findall(reStr, res)
         for obj in res:
-            db.insert(obj[0], getNoteValue(obj[1]), username)
+            db.insertPOST(obj[0], getNoteValue(obj[1]), uid)
             # if len(obj[1])>6:
             #     print(obj)# goodPost.append(obj)
             # if getNoteValue(obj[1]) > getNoteValue(maxPost[1]):# maxPost = obj
         if len(res) < 10:
-            print('user:'+username+' finished')
+            print('userid:'+str(uid)+' finished')
             db.finish()
             break
         else:
@@ -104,16 +115,21 @@ reStr = '<a class="tab selected" href="/following">在 Tumblr 上关注 (.*?)</a
 followCnt = re.findall(reStr, res)[0]
 pageCnt = int(followCnt)/25
 
-reUserLinkStr = '<a class="name-link" href="(.*?)"'
-works = queue.Queue()
 
+works = queue.Queue()
+reLink = '<a class="name-link" href="(.*?)"'
+reLastUpdate = '<span class="last_updated" style="color:#606060;">已于 (.*?) 更新</span>'
+pattern = re.compile(reLink+'[\s\S]*?'+reLastUpdate)
+db = myDB.MyDB()
 for i in range(0, math.ceil(pageCnt)):
     url = followingURL+'/'+str(i*25)
     res = request.urlopen(url).read().decode('UTF-8','ignore')
-    res = re.findall(reUserLinkStr, res)
+    res = re.findall(pattern, res)
     for link in res:
-        print(link)
-        works.put((getUserPostData,(link)))
+        nickName = getNickNameByLink(link[0])
+        db.insert_user(nickName, getUpdateDay(link[1]))
+        uid = db.getUidByName(nickName)
+        works.put((getUserPostData, uid))
     arrResult.extend(res)
     break;
 
