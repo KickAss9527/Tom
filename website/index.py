@@ -7,15 +7,32 @@ bootstrap = Bootstrap(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:1234527@localhost/mydb'
 db = SQLAlchemy(app)
 
+class USER(db.Model):
+    __tablename__ = 'USER'
+    uid = db.Column(db.Integer, primary_key=True)
+    nickName = db.Column(db.String(64))
+    lastUpdate = db.Column(db.Integer)
+    posts = db.relationship('POST', backref='user')
+
 class POST(db.Model):
     __tablename__ = 'POST'
-    pid = db.Column('pid', db.Integer, primary_key=True)
-    note = db.Column('note', db.Integer, primary_key=True)
-    link = db.Column('link', db.String(64), primary_key=True)
-    title = db.Column('title', db.String(64), primary_key=True)
-    userName = db.Column('userName', db.String(64), primary_key=True)
+    pid = db.Column(db.Integer, primary_key=True)
+    note = db.Column(db.Integer)
+    link = db.Column(db.String(64))
+    title = db.Column(db.String(64))
+    userid = db.Column(db.Integer, db.ForeignKey('USER.uid'))
+
+# db.create_all()
 
 topPosts = POST.query.order_by(POST.note.desc()).limit(20).all()
+for post in topPosts:
+    user = post.userid
+    print(user)
+
+users = USER.query.all()
+for u in users:
+    for post in u.posts:
+        print(post.pid)
 
 @app.route('/')
 def index():
