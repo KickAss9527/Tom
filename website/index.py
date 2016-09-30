@@ -22,7 +22,6 @@ class POST(db.Model):
     title = db.Column(db.String(64))
     userid = db.Column(db.Integer, db.ForeignKey('USER.uid'))
 
-# db.create_all()
 
 topPosts = POST.query.order_by(POST.note.desc()).limit(20).all()
 for post in topPosts:
@@ -33,6 +32,7 @@ users = USER.query.all()
 for u in users:
     for post in u.posts:
         print(post.pid)
+        print(post.user.nickName)
 
 @app.route('/')
 def index():
@@ -43,4 +43,5 @@ def user(name):
     return render_template('user.html', name='JOJO')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0')
+    #ip:5000
