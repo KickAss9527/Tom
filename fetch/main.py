@@ -39,9 +39,9 @@ opener = urllib.request.build_opener(cookie_support)
 urllib.request.install_opener(opener)
 
 
-postData = {'determine_email':"411745019@qq.com",
-            'user[email]':'411745019@qq.com',
-            'user[password]':'1234527xmq',
+postData = {'determine_email':"xxxxxxxx@qq.com",
+            'user[email]':'xxxxxxx@qq.com',
+            'user[password]':'xxxxxxxxxx',
             'context':"home_signup",
             'version':"STANDARD",
             'http_referer':"https://www.tumblr.com/",
